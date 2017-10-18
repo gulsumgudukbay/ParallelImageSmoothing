@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		F8ECFBD41F962B4100B34E55 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = F8ECFBD31F962B4100B34E55 /* main.c */; };
+		F8F4D0E91F977129007936A0 /* max-serial.c in Sources */ = {isa = PBXBuildFile; fileRef = F8F4D0E81F977129007936A0 /* max-serial.c */; };
+		F8F4D0EB1F977BB2007936A0 /* max-mpi-v1.c in Sources */ = {isa = PBXBuildFile; fileRef = F8F4D0EA1F977BB2007936A0 /* max-mpi-v1.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +27,8 @@
 /* Begin PBXFileReference section */
 		F8ECFBD01F962B4100B34E55 /* mpi_hello */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = mpi_hello; sourceTree = BUILT_PRODUCTS_DIR; };
 		F8ECFBD31F962B4100B34E55 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		F8F4D0E81F977129007936A0 /* max-serial.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "max-serial.c"; sourceTree = "<group>"; };
+		F8F4D0EA1F977BB2007936A0 /* max-mpi-v1.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "max-mpi-v1.c"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +62,8 @@
 			isa = PBXGroup;
 			children = (
 				F8ECFBD31F962B4100B34E55 /* main.c */,
+				F8F4D0E81F977129007936A0 /* max-serial.c */,
+				F8F4D0EA1F977BB2007936A0 /* max-mpi-v1.c */,
 			);
 			path = mpi_hello;
 			sourceTree = "<group>";
@@ -120,6 +126,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				F8ECFBD41F962B4100B34E55 /* main.c in Sources */,
+				F8F4D0EB1F977BB2007936A0 /* max-mpi-v1.c in Sources */,
+				F8F4D0E91F977129007936A0 /* max-serial.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -233,6 +241,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				"HEADER_SEARCH_PATHS[arch=*]" = /usr/local/include;
+				"LIBRARY_SEARCH_PATHS[arch=*]" = /usr/local/lib;
+				"OTHER_LDFLAGS[arch=*]" = (
+					"-lmpi",
+					"-lm",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -241,6 +255,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				"HEADER_SEARCH_PATHS[arch=*]" = /usr/local/include;
+				"LIBRARY_SEARCH_PATHS[arch=*]" = /usr/local/lib;
+				"OTHER_LDFLAGS[arch=*]" = (
+					"-lmpi",
+					"-lm",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
