@@ -1,9 +1,107 @@
 //
 //  max-mpi-v2.c
-//  mpi_hello
 //
-//  Created by Gulsum on 19/10/2017.
+//  Created by Gulsum on 18/10/2017.
 //  Copyright © 2017 Gulsum. All rights reserved.
 //
 
-#include "max-mpi-v2.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <mpi.h>
+#define INT_MIN -2147483648
+
+int main(int argc, char *argv[])
+{
+    int my_rank, my_size;
+    
+    MPI_Init(NULL, NULL);
+    MPI_Comm_size(MPI_COMM_WORLD, &my_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+    
+    int size, max, child_max;
+    int *data;
+    
+    max = INT_MIN;
+    child_max = INT_MIN;
+
+    if(my_rank == 0)
+    {
+        //file reading stuff
+        FILE* input_file;
+        char *input_file_name;
+        int read_integer, index;
+        
+        size = 0;
+        index = 0;
+        input_file_name = argv[1];
+        input_file = fopen( input_file_name, "r+");
+        
+        while( fscanf( input_file, "%d", &read_integer) != EOF)
+        {
+            size++;
+        }
+        
+        int portion_size = size / my_size;
+        int remainder = size & my_size;
+        
+        for( int q = 0; q < my_size; q++)
+        {
+            MPI_Send((void *) &portion_size, 1, MPI_INT, q, 7, MPI_COMM_WORLD );
+        }
+        fseek(input_file, 0, SEEK_SET);
+        data = ( int * )malloc( size * sizeof(int));
+        
+        while( fscanf( input_file, "%d", &read_integer) != EOF)
+        {
+            data[index] = read_integer;
+            index++;
+        }
+        
+        for( int q = 0; q < my_size; q++)
+        {
+            if( q != my_rank)
+            {
+                if( q < remainder )
+                {
+                    MPI_Send((void*)(data + (q * portion_size)), portion_size + 1, MPI_INT, q, 9, MPI_COMM_WORLD );
+                }
+                else
+                {
+                    MPI_Send((void*)(data + (q * portion_size)), portion_size, MPI_INT, q, 9, MPI_COMM_WORLD );
+                }
+            }
+        }
+        
+        for( int i = my_rank; i < my_rank + portion_size; i++)
+        {
+            if( child_max < data[i])
+                child_max = data[i];
+        }
+    }
+    else
+    {
+        MPI_Recv((void *) &size, 1, MPI_INT, 0, 7, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        printf("size received: %d\n", size);
+        data = ( int * )malloc( size * sizeof(int));
+        MPI_Recv((void*)data, sizeof(data)/my_size, MPI_INT, 0, 9, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        
+        for( int i = 0; i < size; i++)
+        {
+            if( child_max < data[i])
+                child_max = data[i];
+        }
+        
+    }
+    
+    MPI_Allreduce( (void *) &child_max, (void *) &max, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+    printf("The maximum is %d\n", max);
+    
+    
+    MPI_Finalize();
+    free(data);
+    return 0;
+}
+
+

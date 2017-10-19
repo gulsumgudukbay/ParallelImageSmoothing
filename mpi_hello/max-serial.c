@@ -43,5 +43,7 @@ int main(int argc, char *argv[]) {
             max = data[i];
     
     printf("The maximum is %d\n", max);
+    free(data);
     return 0;
 }
+

@@ -91,7 +91,6 @@ int main(int argc, char *argv[])
                     max = cur_max;
             }
         }
-        
     }
     else
     {
@@ -110,10 +109,10 @@ int main(int argc, char *argv[])
         
     }
     
-  
     printf("The maximum is %d\n", max);
     
     MPI_Finalize();
+    free(data);
     return 0;
 }
 

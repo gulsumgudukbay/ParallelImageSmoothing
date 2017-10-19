@@ -10,6 +10,7 @@
 		F8ECFBD41F962B4100B34E55 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = F8ECFBD31F962B4100B34E55 /* main.c */; };
 		F8F4D0E91F977129007936A0 /* max-serial.c in Sources */ = {isa = PBXBuildFile; fileRef = F8F4D0E81F977129007936A0 /* max-serial.c */; };
 		F8F4D0EB1F977BB2007936A0 /* max-mpi-v1.c in Sources */ = {isa = PBXBuildFile; fileRef = F8F4D0EA1F977BB2007936A0 /* max-mpi-v1.c */; };
+		F8F4D0EE1F989F67007936A0 /* max-mpi-v2.c in Sources */ = {isa = PBXBuildFile; fileRef = F8F4D0EC1F989F67007936A0 /* max-mpi-v2.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -29,6 +30,7 @@
 		F8ECFBD31F962B4100B34E55 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		F8F4D0E81F977129007936A0 /* max-serial.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "max-serial.c"; sourceTree = "<group>"; };
 		F8F4D0EA1F977BB2007936A0 /* max-mpi-v1.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "max-mpi-v1.c"; sourceTree = "<group>"; };
+		F8F4D0EC1F989F67007936A0 /* max-mpi-v2.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "max-mpi-v2.c"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,6 +66,7 @@
 				F8ECFBD31F962B4100B34E55 /* main.c */,
 				F8F4D0E81F977129007936A0 /* max-serial.c */,
 				F8F4D0EA1F977BB2007936A0 /* max-mpi-v1.c */,
+				F8F4D0EC1F989F67007936A0 /* max-mpi-v2.c */,
 			);
 			path = mpi_hello;
 			sourceTree = "<group>";
@@ -128,6 +131,7 @@
 				F8ECFBD41F962B4100B34E55 /* main.c in Sources */,
 				F8F4D0EB1F977BB2007936A0 /* max-mpi-v1.c in Sources */,
 				F8F4D0E91F977129007936A0 /* max-serial.c in Sources */,
+				F8F4D0EE1F989F67007936A0 /* max-mpi-v2.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
