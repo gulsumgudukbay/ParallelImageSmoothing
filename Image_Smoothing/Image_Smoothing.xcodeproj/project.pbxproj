@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F8F4D10F1F9A070F007936A0 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = F8F4D10E1F9A070F007936A0 /* main.c */; };
+		F8F4D10F1F9A070F007936A0 /* smooth-serial.c in Sources */ = {isa = PBXBuildFile; fileRef = F8F4D10E1F9A070F007936A0 /* smooth-serial.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,7 +24,7 @@
 
 /* Begin PBXFileReference section */
 		F8F4D10B1F9A070F007936A0 /* Image_Smoothing */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Image_Smoothing; sourceTree = BUILT_PRODUCTS_DIR; };
-		F8F4D10E1F9A070F007936A0 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		F8F4D10E1F9A070F007936A0 /* smooth-serial.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "smooth-serial.c"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,7 +57,7 @@
 		F8F4D10D1F9A070F007936A0 /* Image_Smoothing */ = {
 			isa = PBXGroup;
 			children = (
-				F8F4D10E1F9A070F007936A0 /* main.c */,
+				F8F4D10E1F9A070F007936A0 /* smooth-serial.c */,
 			);
 			path = Image_Smoothing;
 			sourceTree = "<group>";
@@ -119,7 +119,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F8F4D10F1F9A070F007936A0 /* main.c in Sources */,
+				F8F4D10F1F9A070F007936A0 /* smooth-serial.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
