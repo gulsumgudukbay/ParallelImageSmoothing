@@ -10,10 +10,13 @@
 #include <string.h>
 #define INT_MIN -2147483648
 
+//FCLOSE YAP
+
 int main(int argc, char *argv[]) {
     
     int read_integer, row_size, index, kernel_dim;
-    FILE* input_image_file, *input_kernel_file;
+    FILE* input_image_file, *input_kernel_file, *output_image_file;
+    
     char *input_image_file_name, *input_kernel_file_name;
     int **image;
     int **kernel;
@@ -22,11 +25,14 @@ int main(int argc, char *argv[]) {
     row_size = 0;
     kernel_dim = 3;
     index = 0;
-
+    
     input_image_file_name = argv[1];
     input_kernel_file_name = argv[2];
+    
     input_image_file = fopen( input_image_file_name, "r+");
     input_kernel_file = fopen( input_kernel_file_name, "r+");
+    output_image_file = fopen ("output_image.txt", "w+");
+    
     
     if( fscanf( input_image_file, "%d", &read_integer) != EOF)
     {
@@ -84,7 +90,7 @@ int main(int argc, char *argv[]) {
     }
     
     int sum;
-
+    
     int offset = (kernel_dim - 1) / 2;
     for( int i = 0; i < row_size; i++)
     {
@@ -112,7 +118,19 @@ int main(int argc, char *argv[]) {
         }
     }
     
-    printf("The maximum is %d\n", 0);
+    for( int i = 0; i < row_size; i++)
+    {
+        for( int j = 0; j < row_size; j++)
+        {
+            fprintf(output_image_file, "%d ", output_image[i][j]);
+        }
+        fprintf(output_image_file, "\n");
+    }
+    
+    fclose(input_image_file);
+    fclose(input_kernel_file);
+    fclose(output_image_file);
+    printf("Look at the output!");
     return 0;
 }
 
