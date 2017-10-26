@@ -9,8 +9,10 @@
 #include <stdlib.h>
 #include <string.h>
 #define INT_MIN -2147483648
+#include <time.h>
 
 int main(int argc, char *argv[]) {
+    clock_t begin = clock();
     
     int read_integer, size, max, index;
     FILE* input_file;
@@ -44,6 +46,10 @@ int main(int argc, char *argv[]) {
     
     printf("The maximum is %d\n", max);
     free(data);
+    
+    clock_t end = clock();
+    double time_spent = (double)(end - begin) * 1000 / CLOCKS_PER_SEC;
+    printf("Time spent: %lf ms\n", time_spent);
     return 0;
 }
 

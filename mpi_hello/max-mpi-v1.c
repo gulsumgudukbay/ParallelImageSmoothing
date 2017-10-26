@@ -14,6 +14,7 @@
 
 int main(int argc, char *argv[])
 {
+    double timeStart = MPI_Wtime();
     int my_rank, my_size;
     
     MPI_Init(NULL, NULL);
@@ -105,7 +106,9 @@ int main(int argc, char *argv[])
             }
         }
         printf("The maximum is %d\n", max);
-
+        double timeEnd = MPI_Wtime();
+        double timeElapsed = (timeEnd - timeStart) * 1000;
+        printf("Time spent: %lf ms\n", timeElapsed);
     }
     else
     {
@@ -127,6 +130,8 @@ int main(int argc, char *argv[])
     
     MPI_Finalize();
     free(data);
+
+
     return 0;
 }
 

@@ -55,7 +55,7 @@ float* apply_filter( float* arr, float* kernel, int row_size, int col_size, int 
                         sum += arr[(i + k1 - offset) * col_size + j + k2 - offset] * kernel[k1 * kernel_dim + k2];
                     }
                 }
-                if( i != row_size - 1)
+                if( i != row_size - 1 )
                     output_image[i * col_size + j] = sum;
             }
         }
@@ -225,25 +225,9 @@ int main(int argc, char *argv[])
                 MPI_Send((void *) &sent_portion_size, 1, MPI_INT, q, 7, MPI_COMM_WORLD);
                 
                 MPI_Send((void *)(image + (q * row_size * (sent_portion_size+1) -1)), sent_portion_size * row_size, MPI_FLOAT, q, 9, MPI_COMM_WORLD);
-                
-                float* sent_local = (image + (q * row_size * (sent_portion_size+1) -1));
-                char* filename_local = malloc( 20 * sizeof(char));
-                sprintf(filename_local,"local_img_file_%d.txt", q);
-                FILE* local_img = fopen( filename_local, "w+");
-                for( int i = 0; i < sent_portion_size; i++)
-                {
-                    for(int j = 0; j < row_size; j++)
-                    {
-                        fprintf(local_img, "%d ", (int)sent_local[i*row_size+j]);
-                    }
-                    fprintf(local_img, "\n");
-                }
-                fclose(local_img);
-                free(filename_local);
             }
             else
             {
-                
                 sent_portion_size = row_size_portion + 2;
                 
                 if( q == my_size-1)
@@ -251,29 +235,13 @@ int main(int argc, char *argv[])
                 MPI_Send((void *)&sent_portion_size, 1, MPI_INT, q, 7, MPI_COMM_WORLD);
                 
                 MPI_Send((void *)(image + q * row_size * sent_portion_size + rem - 1), sent_portion_size * row_size, MPI_FLOAT, q, 9, MPI_COMM_WORLD);
-                
-                float* sent_local = (image + q * row_size * sent_portion_size + rem - 1);
-                printf("SENT INDEX: %d\n", q*sent_portion_size + rem -1);
-                char* filename_local = malloc( 20 * sizeof(char));
-                sprintf(filename_local,"local_img_file_%d.txt", q);
-                FILE* local_img = fopen( filename_local, "w+");
-                for( int i = 0; i < sent_portion_size; i++)
-                {
-                    for(int j = 0; j < row_size; j++)
-                    {
-                        fprintf(local_img, "%d ", (int)sent_local[i*row_size+j]);
-                    }
-                    fprintf(local_img, "\n");
-                }
-                fclose(local_img);
-                free(filename_local);
             }
             
         }
         
         //process own part
         int master_portion_size = 0;
-        if( 0 <= rem)
+        if( 0 < rem)
         {
             master_portion_size = row_size_portion + 1;
         }
@@ -282,7 +250,8 @@ int main(int argc, char *argv[])
             master_portion_size = row_size_portion;
         }
         int master_out_size = 0;
-        float* master_portion = apply_filter( image, kernel, master_portion_size, row_size, my_rank, my_size, kernel_dim, &master_out_size);
+        float* master_portion = apply_filter( image, kernel, master_portion_size+1, row_size, my_rank, my_size, kernel_dim, &master_out_size);
+        printf("%d", master_out_size);
         for( int i = 0; i < master_out_size; i++)
         {
             for( int j = 0; j < row_size; j++)
@@ -330,7 +299,11 @@ int main(int argc, char *argv[])
         
         fclose(output_image_file);
         printf("Look at the output!\n");
-
+        //free stuff
+        free(image);
+        free(kernel);
+        free(output_image);
+        
         
     }
     else //CHILDREN
@@ -372,14 +345,8 @@ int main(int argc, char *argv[])
     
     MPI_Finalize();
     
-    //free stuff
-    /*
+   
     
-    free(image);
-    free(kernel);
-    free(output_image);
-    
-    */
     
     return 0;
 }
