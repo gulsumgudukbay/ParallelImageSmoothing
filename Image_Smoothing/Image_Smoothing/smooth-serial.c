@@ -16,9 +16,9 @@ int main(int argc, char *argv[]) {
     FILE* input_image_file, *input_kernel_file, *output_image_file;
     
     char *input_image_file_name, *input_kernel_file_name;
-    int **image;
-    int **kernel;
-    int **output_image;
+    float **image;
+    float **kernel;
+    float **output_image;
     
     row_size = 0;
     kernel_dim = 3;
@@ -37,26 +37,26 @@ int main(int argc, char *argv[]) {
         row_size = read_integer;
     }
     
-    image = malloc( row_size * sizeof(int*));
+    image = malloc( row_size * sizeof(float*));
     
     for( int i = 0; i < row_size; i++)
     {
-        image[i] = malloc( row_size * sizeof(int));
+        image[i] = malloc( row_size * sizeof(float));
     }
     
-    output_image = malloc( row_size * sizeof(int*));
+    output_image = malloc( row_size * sizeof(float*));
     
     for( int i = 0; i < row_size; i++)
     {
-        output_image[i] = malloc( row_size * sizeof(int));
+        output_image[i] = malloc( row_size * sizeof(float));
     }
     
     
-    kernel = malloc( kernel_dim * sizeof(int*));
+    kernel = malloc( kernel_dim * sizeof(float*));
     
     for( int i = 0; i < kernel_dim; i++)
     {
-        kernel[i] = malloc( kernel_dim * sizeof(int));
+        kernel[i] = malloc( kernel_dim * sizeof(float));
     }
     
     for(int i = 0; i < row_size; i++)
@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
         }
     }
     
-    int kernel_sum = 0;
+    float kernel_sum = 0;
     for( int i = 0; i < kernel_dim; i++)
     {
         for( int j = 0; j < kernel_dim; j++)
@@ -87,7 +87,16 @@ int main(int argc, char *argv[]) {
         }
     }
     
-    int sum;
+    for( int i = 0; i < kernel_dim; i++)
+    {
+        for( int j = 0; j < kernel_dim; j++)
+        {
+            kernel[i][j] = kernel[i][j] / kernel_sum;
+            printf("%f\n", kernel[i][j]);
+        }
+    }
+    
+    float sum;
     
     int offset = (kernel_dim - 1) / 2;
     for( int i = 0; i < row_size; i++)
@@ -112,7 +121,8 @@ int main(int argc, char *argv[]) {
                     sum += image[i + k1 - offset][j + k2 - offset] * kernel[k1][k2];
                 }
             }
-            output_image[i][j] = sum / kernel_sum;
+            output_image[i][j] = sum;
+            
         }
     }
     
@@ -120,10 +130,26 @@ int main(int argc, char *argv[]) {
     {
         for( int j = 0; j < row_size; j++)
         {
-            fprintf(output_image_file, "%d ", output_image[i][j]);
+            fprintf(output_image_file, "%f ", output_image[i][j]);
         }
         fprintf(output_image_file, "\n");
     }
+    
+    //free stuff
+    for( int i = 0; i < row_size; i++)
+    {
+        free(image[i]);
+        free(output_image[i]);
+    }
+    
+    for( int i = 0; i < kernel_dim; i++)
+    {
+        free(kernel[i]);
+    }
+    
+    free(image);
+    free(kernel);
+    free(output_image);
     
     fclose(input_image_file);
     fclose(input_kernel_file);

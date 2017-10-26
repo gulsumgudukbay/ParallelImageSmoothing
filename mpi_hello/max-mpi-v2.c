@@ -44,12 +44,8 @@ int main(int argc, char *argv[])
         }
         
         int portion_size = size / my_size;
-        int remainder = size & my_size;
+        int remainder = size % my_size;
         
-        for( int q = 0; q < my_size; q++)
-        {
-            MPI_Send((void *) &portion_size, 1, MPI_INT, q, 7, MPI_COMM_WORLD );
-        }
         fseek(input_file, 0, SEEK_SET);
         data = ( int * )malloc( size * sizeof(int));
         
@@ -65,29 +61,46 @@ int main(int argc, char *argv[])
             {
                 if( q < remainder )
                 {
-                    MPI_Send((void*)(data + (q * portion_size)), portion_size + 1, MPI_INT, q, 9, MPI_COMM_WORLD );
+                    int rows = portion_size + 1;
+                    MPI_Send((void *) &rows, 1, MPI_INT, q, 7, MPI_COMM_WORLD );
+                    MPI_Send((void*)(data + (q * rows)), rows, MPI_INT, q, 9, MPI_COMM_WORLD );
                 }
                 else
                 {
-                    MPI_Send((void*)(data + (q * portion_size)), portion_size, MPI_INT, q, 9, MPI_COMM_WORLD );
+                    int rows = portion_size;
+                    MPI_Send((void *) &rows, 1, MPI_INT, q, 7, MPI_COMM_WORLD );
+                    MPI_Send((void*)(data + (q * portion_size + remainder)), rows, MPI_INT, q, 9, MPI_COMM_WORLD );
                 }
             }
         }
         
-        for( int i = my_rank; i < my_rank + portion_size; i++)
-        {
-            if( child_max < data[i])
-                child_max = data[i];
-        }
+         int master_portion_size = 0;
+         int master_index = 0;
+         if( my_rank < remainder)
+         {
+             master_index = my_rank * (portion_size + 1);
+             master_portion_size = portion_size + 1;
+         }
+         else
+         {
+             master_index = my_rank * portion_size + remainder;
+             master_portion_size = portion_size;
+         }
+         for( int i = master_index; i < master_portion_size; i++)
+         {
+             if( child_max < data[i])
+                 child_max = data[i];
+         }
     }
     else
     {
-        MPI_Recv((void *) &size, 1, MPI_INT, 0, 7, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        printf("size received: %d\n", size);
-        data = ( int * )malloc( size * sizeof(int));
-        MPI_Recv((void*)data, sizeof(data)/my_size, MPI_INT, 0, 9, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        int portion_size_child;
+        MPI_Recv((void *) &portion_size_child, 1, MPI_INT, 0, 7, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        printf("size received: %d\n", portion_size_child);
+        data = ( int * )malloc( portion_size_child * sizeof(int));
+        MPI_Recv((void*)data, portion_size_child, MPI_INT, 0, 9, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         
-        for( int i = 0; i < size; i++)
+        for( int i = 0; i < portion_size_child; i++)
         {
             if( child_max < data[i])
                 child_max = data[i];
