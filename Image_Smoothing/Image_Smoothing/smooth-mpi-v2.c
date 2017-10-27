@@ -18,111 +18,108 @@ int log_base_2( int a)
     return (int)(log10((double)a)/log10((double)2));
 }
 
-float* apply_filter( float* arr, float* kernel, int row_size, int col_size, int rank, int np, int kernel_dim, int *out_row_size)
+float* apply_filter( float* arr, float* kernel, int row_size, int col_size, int rank, int np, int kernel_dim, int out_row_size)
 {
     float sum;
-    float o_row_size;
     
-    if( rank == 0 || rank == np-1)
-    {
-        o_row_size = row_size - 1;
-        *out_row_size = o_row_size;
-    }
-    else
-    {
-        o_row_size = row_size - 2;
-        *out_row_size = o_row_size;
-    }
-    
-    float* output_image = malloc( o_row_size * col_size * sizeof(float));
+    float* output_image = malloc( out_row_size * out_row_size * sizeof(float));
     int offset = (kernel_dim - 1) / 2;
     
-    if( rank == 0)
+    
+    for( int i = 0; i < row_size; i++)
     {
-        for( int i = 0; i < row_size; i++)
+        for( int j = 0; j < col_size; j++)
         {
-            for( int j = 0; j < col_size; j++)
+            sum = 0;
+            for( int k1 = 0; k1 < kernel_dim; k1++)
             {
-                sum = 0;
-                for( int k1 = 0; k1 < kernel_dim; k1++)
+                if( i + k1 < offset || i + k1 - offset >= row_size ) //out of vertical boundaries
                 {
-                    if( i + k1 < offset || i + k1 - offset >= row_size ) //out of vertical boundaries
+                    continue;
+                }
+                
+                for( int k2 = 0; k2 < kernel_dim; k2++)
+                {
+                    if( j + k2 < offset || j + k2 - offset >= col_size) //out of horizontal boundaries
                     {
                         continue;
                     }
                     
-                    for( int k2 = 0; k2 < kernel_dim; k2++)
-                    {
-                        if( j + k2 < offset || j + k2 - offset >= col_size) //out of horizontal boundaries
-                        {
-                            continue;
-                        }
-                        
-                        sum += arr[(i + k1 - offset) * col_size + j + k2 - offset] * kernel[k1 * kernel_dim + k2];
-                    }
+                    sum += arr[(i + k1 - offset) * col_size + j + k2 - offset] * kernel[k1 * kernel_dim + k2];
                 }
-                if( i != row_size - 1 )
-                    output_image[i * col_size + j] = sum;
             }
-        }
-    }
-    else if( rank == np-1)
-    {
-        for( int i = 0; i < row_size; i++)
-        {
-            for( int j = 0; j < col_size; j++)
+            
+            
+            //////////////
+            int sqrt_np = sqrt(np);
+            if( rank == 0) //first row first column
             {
-                sum = 0;
-                for( int k1 = 0; k1 < kernel_dim; k1++)
-                {
-                    if( i + k1 < offset || i + k1 - offset >= row_size ) //out of vertical boundaries
-                    {
-                        continue;
-                    }
-                    
-                    for( int k2 = 0; k2 < kernel_dim; k2++)
-                    {
-                        if( j + k2 < offset || j + k2 - offset >= col_size) //out of horizontal boundaries
-                        {
-                            continue;
-                        }
-                        
-                        sum += arr[(i + k1 - offset) * col_size + j + k2 - offset] * kernel[k1 * kernel_dim + k2];
-                    }
-                }
-                if( i != 0)
-                    output_image[(i-1) * col_size + j] = sum;
+                if( i != row_size - 1 && j != col_size - 1 )
+                    output_image[i * out_row_size + j] = sum;
+                if(i == 0 && j == 0)
+                    printf( "Hello from case 1\n");
             }
-        }
-    }
-    else
-    {
-        for( int i = 0; i < row_size; i++)
-        {
-            for( int j = 0; j < col_size; j++)
+            else if( (rank % sqrt_np == 0) && (rank / sqrt_np > 0) && (rank / sqrt_np < sqrt_np-1) ) //first col middle rows
             {
-                sum = 0;
-                for( int k1 = 0; k1 < kernel_dim; k1++)
-                {
-                    if( i + k1 < offset || i + k1 - offset >= row_size) //out of boundaries
-                    {
-                        continue;
-                    }
-                    
-                    for( int k2 = 0; k2 < kernel_dim; k2++)
-                    {
-                        if( j + k2 < offset || j + k2 - offset >= col_size) //out of boundaries
-                        {
-                            continue;
-                        }
-                        
-                        sum += arr[(i + k1 - offset) * col_size + j + k2 - offset] * kernel[k1 * kernel_dim + k2];
-                    }
-                }
-                if( i != 0 && i != row_size-1)
-                    output_image[(i-1) * col_size + j] = sum;
+                printf( "Here\n");
+
+                if( i != 0 && i != row_size - 1 && j != col_size - 1 )
+                    output_image[(i-1) * out_row_size + j] = sum;
+                if(i == 0 && j == 0)
+                    printf( "Hello from case 2\n");
             }
+            else if( (rank % sqrt_np == 0) && (rank/ sqrt_np == sqrt_np-1) ) // first col last row
+            {
+                if( i != 0 && i != row_size - 1 && j != col_size - 1 )
+                    output_image[(i-1) * out_row_size + j] = sum;
+                if(i == 0 && j == 0)
+                    printf( "Hello from case 3\n");
+            }
+            else if( (rank % sqrt_np > 0) && (rank / sqrt_np == 0) && (rank % sqrt_np < sqrt_np-1)  ) // first row middle columns
+            {
+                if( j != 0 && j != col_size-1)
+                    output_image[i * out_row_size + j-1] = sum;
+                if(i == 0 && j == 0)
+                    printf( "Hello from case 4\n");
+            }
+            else if( (rank % sqrt_np > 0 ) && (rank % sqrt_np < sqrt_np - 1) && (rank / sqrt_np > 0) && (rank / sqrt_np < sqrt_np - 1) ) // middle columns middle rows
+            {
+                if( j != 0 && j != col_size-1 && i != 0 && i != row_size-1)
+                    output_image[(i-1) * out_row_size + j-1] = sum;
+                if(i == 0 && j == 0)
+                    printf( "Hello from case 5\n");
+            }
+            else if( (rank % sqrt_np > 0) && ( rank % sqrt_np < sqrt_np-1) && (rank / sqrt_np == sqrt_np-1) ) // last row middle columns
+            {
+                if( j != 0 && j != col_size-1 && i != row_size-1)
+                    output_image[i * out_row_size + j-1] = sum;
+                if(i == 0 && j == 0)
+                    printf( "Hello from case 6\n");
+            }
+            else if( (rank % sqrt_np == sqrt_np - 1) && (rank / sqrt_np == 0)) //first row last col
+            {
+                if( i != row_size-1 && j != 0)
+                    output_image[i * out_row_size + j-1] = sum;
+                if(i == 0 && j == 0)
+                    printf( "Hello from case 7\n");
+            }
+            else if( (rank % sqrt_np == sqrt_np - 1) && ( rank / sqrt_np > 0) && ( rank / sqrt_np < sqrt_np - 1) ) //last col middle rows
+            {
+               if( j != 0 && i != row_size-1 && i != 0)
+                   output_image[(i-1) * out_row_size + j-1] = sum;
+                if(i == 0 && j == 0)
+                    printf( "Hello from case 8\n");
+            }
+            else if (( rank % sqrt_np == sqrt_np-1) && ( rank / sqrt_np == sqrt_np-1) ) //last row last column
+            {
+                if( j != 0 && i != row_size-1)
+                    output_image[i * out_row_size + j-1] = sum;
+                if(i == 0 && j == 0)
+                    printf( "Hello from case 9\n");
+            }
+            ///////////////
         }
+        
     }
     
     return output_image;
@@ -156,7 +153,7 @@ int main(int argc, char *argv[])
         
         input_image_file = fopen( input_image_file_name, "r+");
         input_kernel_file = fopen( input_kernel_file_name, "r+");
-        output_image_file = fopen ("output_image.txt", "w+");
+        output_image_file = fopen ("smooth-mpi-v2-output.txt", "w+");
         
         if( fscanf( input_image_file, "%d", &read_integer) != EOF)
         {
@@ -224,6 +221,8 @@ int main(int argc, char *argv[])
 
         for( int q = 1; q < my_size; q++)
         {
+            MPI_Send((void *) &no_of_rows_per_process, 1, MPI_INT, q, 3, MPI_COMM_WORLD );
+
             if( (q % sqrt_np == 0) && (q / sqrt_np > 0) && (q / sqrt_np < sqrt_np-1) ) //first col middle rows
             {
                 int sent_no_of_cols_per_process = no_of_cols_per_process + 1;
@@ -396,7 +395,7 @@ int main(int argc, char *argv[])
         int master_row_out = no_of_rows_per_process;
         int master_col_out = no_of_cols_per_process;
         
-        float* master_portion = apply_filter( image, kernel, master_row_size, master_col_size, my_rank, my_size, kernel_dim, &master_row_out);
+        float* master_portion = apply_filter( image, kernel, master_row_size, master_col_size, my_rank, my_size, kernel_dim, master_row_out);
         for( int i = 0; i < master_row_out; i++)
         {
             for( int j = 0; j < master_col_out; j++)
@@ -407,32 +406,32 @@ int main(int argc, char *argv[])
         
         
         int row_index_out = 0;
-        int no_of_rows = 0;
-        printf("before merge\n");
+        int col_index_out = 0;
 
         //merge!
         
         for( int q = 1; q < my_size; q++)
         {
-            MPI_Recv((void *) &no_of_rows, 1, MPI_INT, q, 10, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            float *local_image = malloc(no_of_rows_per_process * no_of_rows_per_process * sizeof(float));
             
-            float *local_image = malloc(no_of_rows * row_size * sizeof(float));
+            MPI_Recv((void *) local_image, no_of_rows_per_process * no_of_rows_per_process, MPI_FLOAT, q, 11, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             
-            MPI_Recv((void *) local_image, no_of_rows * row_size, MPI_FLOAT, q, 11, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            printf("Received local img arr from: %d\n", my_rank);
             
-            
-            for( int i = 0; i < no_of_rows; i++)
+            for( int i = 0; i < no_of_rows_per_process; i++)
             {
-                for(int j = 0; j < row_size; j++)
+                for(int j = 0; j < no_of_rows_per_process; j++)
                 {
-                    output_image[(no_of_cols_per_process + row_index_out) * row_size + j] = local_image[i * row_size + j];
+                    output_image[(no_of_cols_per_process + row_index_out) * row_size + col_index_out] = local_image[i * no_of_rows_per_process + j];
+                    col_index_out++;
                 }
                 row_index_out++;
             }
             
             free(local_image);
         }
-        
+        printf("after merge\n");
+
         for( int i = 0; i < row_size; i++)
         {
             for( int j = 0; j < row_size; j++)
@@ -459,10 +458,12 @@ int main(int argc, char *argv[])
         float *local_image, *kernel_local;
         int row_size_portion = 0;
         int col_size = 0;
+        int out_row_size = 0;
         //receive kernel
         
         kernel_local = malloc( kernel_dim * kernel_dim * sizeof(float));
-        
+        MPI_Recv((void *) &out_row_size, 1, MPI_INT, 0, 3, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
         MPI_Recv((void *) kernel_local, kernel_dim * kernel_dim, MPI_FLOAT, 0, 6, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         
         //receive col size
@@ -470,20 +471,17 @@ int main(int argc, char *argv[])
         
         //receive no of rows per process
         MPI_Recv((void *) &row_size_portion, 1, MPI_INT, 0, 7, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        printf("Process: %d, row size: %d, col size: %d\n", my_rank, row_size_portion, col_size);
         
         local_image = malloc( row_size_portion * col_size * sizeof(float));
         
         MPI_Recv((void *) local_image, row_size_portion * col_size, MPI_FLOAT, 0, 9, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        printf("appllied filter %d\n", my_rank);
+
+        float* local_output = apply_filter( local_image, kernel_local, row_size_portion, col_size, my_rank, my_size, kernel_dim, out_row_size);
+
         
-        int out_row_size = 0;
-        
-        float* local_output = apply_filter( local_image, kernel_local, row_size_portion, col_size, my_rank, my_size, kernel_dim, &out_row_size);
-        
-        MPI_Send((void *) &out_row_size, 1, MPI_INT, 0, 10, MPI_COMM_WORLD);
-        
-        MPI_Send((void *)local_output, out_row_size * col_size, MPI_FLOAT, 0, 11, MPI_COMM_WORLD);
-        
+        MPI_Send((void *)local_output, out_row_size * out_row_size, MPI_FLOAT, 0, 11, MPI_COMM_WORLD);
+
         free(local_image);
         
     }

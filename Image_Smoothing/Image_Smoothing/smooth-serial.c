@@ -9,9 +9,13 @@
 #include <stdlib.h>
 #include <string.h>
 #define INT_MIN -2147483648
+#include <time.h>
 
-int main(int argc, char *argv[]) {
-    
+
+int main(int argc, char *argv[])
+{
+    clock_t begin = clock();
+
     int read_integer, row_size, index, kernel_dim;
     FILE* input_image_file, *input_kernel_file, *output_image_file;
     
@@ -29,7 +33,7 @@ int main(int argc, char *argv[]) {
     
     input_image_file = fopen( input_image_file_name, "r+");
     input_kernel_file = fopen( input_kernel_file_name, "r+");
-    output_image_file = fopen ("output_image.txt", "w+");
+    output_image_file = fopen ("smooth-serial-output.txt", "w+");
     
     
     if( fscanf( input_image_file, "%d", &read_integer) != EOF)
@@ -92,7 +96,6 @@ int main(int argc, char *argv[]) {
         for( int j = 0; j < kernel_dim; j++)
         {
             kernel[i][j] = kernel[i][j] / kernel_sum;
-            printf("%f\n", kernel[i][j]);
         }
     }
     
@@ -155,6 +158,11 @@ int main(int argc, char *argv[]) {
     fclose(input_kernel_file);
     fclose(output_image_file);
     printf("Look at the output!\n");
+    
+    clock_t end = clock();
+    double time_spent = (double)(end - begin) * 1000 / CLOCKS_PER_SEC;
+    printf("Time spent: %lf ms\n", time_spent);
+    
     return 0;
 }
 

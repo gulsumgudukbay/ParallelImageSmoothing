@@ -14,6 +14,7 @@
 
 int main(int argc, char *argv[])
 {
+    double timeStart = MPI_Wtime();
     int my_rank, my_size;
     
     MPI_Init(NULL, NULL);
@@ -96,7 +97,6 @@ int main(int argc, char *argv[])
     {
         int portion_size_child;
         MPI_Recv((void *) &portion_size_child, 1, MPI_INT, 0, 7, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        printf("size received: %d\n", portion_size_child);
         data = ( int * )malloc( portion_size_child * sizeof(int));
         MPI_Recv((void*)data, portion_size_child, MPI_INT, 0, 9, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         
@@ -111,9 +111,13 @@ int main(int argc, char *argv[])
     MPI_Allreduce( (void *) &child_max, (void *) &max, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
     printf("The maximum is %d\n", max);
     
-    
+    MPI_Barrier(MPI_COMM_WORLD);
+    double timeEnd = MPI_Wtime();
+    double timeElapsed = (timeEnd - timeStart) * 1000;
+    printf("Time spent: %lf ms\n", timeElapsed);
     MPI_Finalize();
     free(data);
+    
     return 0;
 }
 

@@ -125,6 +125,8 @@ float* apply_filter( float* arr, float* kernel, int row_size, int col_size, int 
 
 int main(int argc, char *argv[])
 {
+    double timeStart = MPI_Wtime();
+
     int my_rank, my_size;
     
     MPI_Init(NULL, NULL);
@@ -150,7 +152,7 @@ int main(int argc, char *argv[])
         
         input_image_file = fopen( input_image_file_name, "r+");
         input_kernel_file = fopen( input_kernel_file_name, "r+");
-        output_image_file = fopen ("output_image.txt", "w+");
+        output_image_file = fopen ("smooth-mpi-v1-output.txt", "w+");
 
         if( fscanf( input_image_file, "%d", &read_integer) != EOF)
         {
@@ -224,7 +226,7 @@ int main(int argc, char *argv[])
                 sent_portion_size = row_size_portion + 3;
                 MPI_Send((void *) &sent_portion_size, 1, MPI_INT, q, 7, MPI_COMM_WORLD);
                 
-                MPI_Send((void *)(image + (q * row_size * (sent_portion_size+1) -1)), sent_portion_size * row_size, MPI_FLOAT, q, 9, MPI_COMM_WORLD);
+                MPI_Send((void *)(image + (q * row_size * (row_size_portion) -1) ), sent_portion_size * row_size, MPI_FLOAT, q, 9, MPI_COMM_WORLD);
             }
             else
             {
@@ -234,7 +236,8 @@ int main(int argc, char *argv[])
                     sent_portion_size--;
                 MPI_Send((void *)&sent_portion_size, 1, MPI_INT, q, 7, MPI_COMM_WORLD);
                 
-                MPI_Send((void *)(image + q * row_size * sent_portion_size + rem - 1), sent_portion_size * row_size, MPI_FLOAT, q, 9, MPI_COMM_WORLD);
+                MPI_Send((void *)(image + (q * row_size * (row_size_portion) -1) ), sent_portion_size * row_size, MPI_FLOAT, q, 9, MPI_COMM_WORLD);
+                printf("index: %d\n", q*row_size_portion-1);
             }
             
         }
@@ -243,16 +246,16 @@ int main(int argc, char *argv[])
         int master_portion_size = 0;
         if( 0 < rem)
         {
-            master_portion_size = row_size_portion + 1;
+            master_portion_size = row_size_portion + 2;
         }
         else
         {
-            master_portion_size = row_size_portion;
+            master_portion_size = row_size_portion + 1;
         }
         int master_out_size = 0;
-        float* master_portion = apply_filter( image, kernel, master_portion_size+1, row_size, my_rank, my_size, kernel_dim, &master_out_size);
+        float* master_portion = apply_filter( image, kernel, master_portion_size, row_size, my_rank, my_size, kernel_dim, &master_out_size);
         printf("%d", master_out_size);
-        for( int i = 0; i < master_out_size; i++)
+        for( int i = 0; i < master_portion_size; i++)
         {
             for( int j = 0; j < row_size; j++)
             {
@@ -304,7 +307,10 @@ int main(int argc, char *argv[])
         free(kernel);
         free(output_image);
         
-        
+        double timeEnd = MPI_Wtime();
+        double timeElapsed = (timeEnd - timeStart) * 1000;
+        printf("Time spent: %lf ms\n", timeElapsed);
+
     }
     else //CHILDREN
     {
